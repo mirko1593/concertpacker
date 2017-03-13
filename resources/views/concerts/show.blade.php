@@ -1,0 +1,11 @@
+<h1>{{ $concert->title }}</h1>
+<h1>{{ $concert->subtitle }}</h1>
+<h1>{{ $concert->formatted_date }}</h1>
+<h1>{{ $concert->start_time }}</h1>
+<h1>{{ $concert->sellPrice }}</h1>
+<h1>{{ $concert->venue }}</h1>
+<h1>{{ $concert->venue_address }}</h1>
+<h1>{{ $concert->city }}</h1>
+<h1>{{ $concert->state }}</h1>
+<h1>{{ $concert->zip }}</h1>
+<h1>{{ $concert->additional_information }}</h1>

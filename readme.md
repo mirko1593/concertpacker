@@ -2,8 +2,8 @@
 - Just a kata to practice TDD. 
 - It is about to provide a packer to pack ticket-selling function of concerts.
 
-## First Commit 
-First Commit is all about view concert details.
+## Progress 
+- First Commit is all about view concert details.
 
 
 ## License

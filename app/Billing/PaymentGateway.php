@@ -6,7 +6,7 @@ interface PaymentGateway
 {
     public function getValidToken();
 
-    public function getTotalCharges();
-
     public function charge($amount, $token);
+
+    public function totalCharges();
 }

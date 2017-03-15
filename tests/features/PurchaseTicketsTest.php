@@ -2,6 +2,7 @@
 
 use App\Concert;
 use App\Billing\PaymentGateway;
+use App\Billing\FakePaymentGateway;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -34,7 +35,7 @@ class PurchaseTicketsTest extends TestCase
         $order = $concert->orders()->where('email', 'john@example.com')->first();
         $this->assertNotNull($order);
         $this->assertEquals(3, $order->tickets()->count());
-        $this->assertEquals(9750, $this->paymentGateway->getTotalCharges());
+        $this->assertEquals(9750, $this->paymentGateway->totalCharges());
     }
 
     /** @test */
@@ -47,7 +48,7 @@ class PurchaseTicketsTest extends TestCase
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email' => 'john@example.com',
             'ticket_quantity' => 3,
-            'payment_token' => $this->paymentGateway->getInvalidToken()
+            'payment_token' => 'invalid-token'
         ]);     
 
         $this->assertResponseStatus(422);
@@ -70,6 +71,6 @@ class PurchaseTicketsTest extends TestCase
 
         $this->assertResponseStatus(404);
         $this->assertEquals(0, $concert->orders()->count());
-        $this->assertEquals(0, $this->paymentGateway->getTotalCharges());        
+        $this->assertEquals(0, $this->paymentGateway->totalCharges());        
     }
 }

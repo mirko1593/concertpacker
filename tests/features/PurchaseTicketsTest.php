@@ -10,12 +10,16 @@ class PurchaseTicketsTest extends TestCase
 {
     use DatabaseMigrations;
 
+    public function setUp()
+    {
+        parent::setUp();
+        $this->paymentGateway = new FakePaymentGateway;
+        $this->app->instance(PaymentGateway::class, $this->paymentGateway);
+    }
+
     /** @test */
     public function can_purchase_concert_tickets()
     {
-        $paymentGateway = new FakePaymentGateway;
-        $this->app->instance(PaymentGateway::class, $paymentGateway);
-
         $concert = factory(Concert::class)->states('published')->create([
             'ticket_price' => 3250
         ]);
@@ -23,13 +27,13 @@ class PurchaseTicketsTest extends TestCase
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email' => 'john@example.com',
             'ticket_quantity' => 3,
-            'payment_token' => $paymentGateway->getValidToken()
+            'payment_token' => $this->paymentGateway->getValidToken()
         ]);
 
         $this->assertResponseStatus(201);
         $order = $concert->orders()->where('email', 'john@example.com')->first();
         $this->assertNotNull($order);
         $this->assertEquals(3, $order->tickets()->count());
-        $this->assertEquals(9750, $paymentGateway->getTotalCharges());
+        $this->assertEquals(9750, $this->paymentGateway->getTotalCharges());
     }
 }

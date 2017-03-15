@@ -24,6 +24,7 @@ class PurchaseTicketsTest extends TestCase
         $concert = factory(Concert::class)->states('published')->create([
             'ticket_price' => 3250
         ]);
+        $concert->addTickets(10);
 
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email' => 'john@example.com',
@@ -44,6 +45,7 @@ class PurchaseTicketsTest extends TestCase
         $concert = factory(Concert::class)->states('published')->create([
             'ticket_price' => 3250
         ]);
+        $concert->addTickets(3);
 
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email' => 'john@example.com',
@@ -72,5 +74,24 @@ class PurchaseTicketsTest extends TestCase
         $this->assertResponseStatus(404);
         $this->assertEquals(0, $concert->orders()->count());
         $this->assertEquals(0, $this->paymentGateway->totalCharges());        
+    }
+
+    /** @test */
+    public function cannot_purchase_more_tickets_than_remaining()
+    {
+        $concert = factory(Concert::class)->states('published')->create();
+        $concert->addTickets(10);
+
+        $this->json('POST', "/concerts/{$concert->id}/orders", [
+            'email' => 'john@example.com',
+            'ticket_quantity' => 11,
+            'payment_token' => $this->paymentGateway->getValidToken()
+        ]);
+
+        $this->assertResponseStatus(422);
+        $order = $concert->orders()->where('email', 'john@example.com')->first();
+        $this->assertNull($order);
+        $this->assertEquals(0, $this->paymentGateway->totalCharges());
+        $this->assertCount(10, $concert->remainingTickets());
     }
 }

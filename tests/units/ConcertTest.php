@@ -2,6 +2,7 @@
 
 use App\Concert;
 use Carbon\Carbon;
+use App\Exceptions\NotEnoughTicketsException;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -57,14 +58,61 @@ class ConcertTest extends TestCase
     /** @test */
     public function can_order_concert_tickets()
     {
-        $concert = factory(Concert::class)->states('published')->create([
-            'ticket_price' => 3250
-        ]);
+        $concert = factory(Concert::class)->states('published')->create();
+        $concert->addTickets(10);
 
         $concert->orderTickets(5, 'john@example.com');
 
         $order = $concert->orders()->where('email', 'john@example.com')->first();
         $this->assertNotNull($order);
         $this->assertEquals(5, $order->tickets()->count());
+    }
+
+    /** @test */
+    public function can_add_concert_tickets()
+    {
+        $concert = factory(Concert::class)->states('published')->create();
+
+        $concert->addTickets(50);
+
+        $this->assertCount(50, $concert->remainingTickets());
+    }
+
+    /** @test */
+    public function remaining_tickets_does_not_include_ordered_tickets()
+    {
+        $concert = factory(Concert::class)->states('published')->create();
+        $concert->addTickets(50);
+
+        $concert->orderTickets(25, 'john@example.com');
+
+        $this->assertCount(25, $concert->remainingTickets());
+    }
+
+    /** @test */
+    public function purchase_more_tickets_than_remaining_will_throw_exception()
+    {
+        $concert = factory(Concert::class)->states('published')->create();
+        $concert->addTickets(50);    
+
+        try {
+            $concert->orderTickets(51, 'john@example.com');    
+        } catch (NotEnoughTicketsException $e) {
+            return;
+        }
+
+        $this->fail();
+    }
+
+    /** @test */
+    public function can_canel_concert_tickets()
+    {
+        $concert = factory(Concert::class)->states('published')->create();
+        $concert->addTickets(5);    
+        $concert->orderTickets(3, 'john@example.com');
+
+        $concert->cancelTickets('john@example.com');
+
+        $this->assertCount(5, $concert->remainingTickets());
     }
 }

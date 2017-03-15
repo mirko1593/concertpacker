@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use Exception;
 use App\Order;
 use App\Ticket;
 use App\Concert;
@@ -25,11 +26,17 @@ class ConcertOrdersController extends Controller
             'payment_token' => 'required'
         ]);
 
-        $concert = Concert::findOrFail($concert_id);
+        $concert = Concert::published()->findOrFail($concert_id);
 
-        $concert->orderTickets($request['ticket_quantity'], $request['email']);
-
-        $this->paymentGateway->charge($concert->ticket_price * $request['ticket_quantity'], $request['payment_token']);
+        try {
+            $this->paymentGateway->charge(
+                $concert->ticket_price * $request['ticket_quantity'], 
+                $request['payment_token']
+            );
+            $concert->orderTickets($request['ticket_quantity'], $request['email']);
+        } catch (Exception $e) {
+            return response()->json([], 422);
+        }
 
         return response()->json([], 201);
     }

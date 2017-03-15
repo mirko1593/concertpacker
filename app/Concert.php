@@ -42,12 +42,8 @@ class Concert extends Model
             'email' => $email,
             'concert_id' => $this->id
         ]);
-        collect([
-            new Ticket,
-            new Ticket,
-            new Ticket
-        ])->each(function ($ticket) use ($order) {
-            $order->tickets()->save($ticket);
+        collect(range(1, $quantity))->each(function () use ($order) {
+            $order->tickets()->save(new Ticket);
         });
 
         $this->orders()->save($order);

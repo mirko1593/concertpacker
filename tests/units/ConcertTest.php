@@ -61,10 +61,10 @@ class ConcertTest extends TestCase
             'ticket_price' => 3250
         ]);
 
-        $concert->orderTickets(3, 'john@example.com');
+        $concert->orderTickets(5, 'john@example.com');
 
         $order = $concert->orders()->where('email', 'john@example.com')->first();
         $this->assertNotNull($order);
-        $this->assertEquals(3, $order->tickets()->count());
+        $this->assertEquals(5, $order->tickets()->count());
     }
 }

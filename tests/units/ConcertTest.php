@@ -53,4 +53,18 @@ class ConcertTest extends TestCase
         $this->assertCount(1, $concerts);
         $this->assertTrue($concerts->contains($concert1));
     }
+
+    /** @test */
+    public function can_order_concert_tickets()
+    {
+        $concert = factory(Concert::class)->states('published')->create([
+            'ticket_price' => 3250
+        ]);
+
+        $concert->orderTickets(3, 'john@example.com');
+
+        $order = $concert->orders()->where('email', 'john@example.com')->first();
+        $this->assertNotNull($order);
+        $this->assertEquals(3, $order->tickets()->count());
+    }
 }

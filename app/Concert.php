@@ -35,4 +35,21 @@ class Concert extends Model
     {
         return $this->hasMany(Order::class);
     }
+
+    public function orderTickets($quantity, $email)
+    {
+        $order = Order::create([
+            'email' => $email,
+            'concert_id' => $this->id
+        ]);
+        collect([
+            new Ticket,
+            new Ticket,
+            new Ticket
+        ])->each(function ($ticket) use ($order) {
+            $order->tickets()->save($ticket);
+        });
+
+        $this->orders()->save($order);
+    }
 }

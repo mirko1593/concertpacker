@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Order;
-use App\Ticket;
 use App\Concert;
 use Illuminate\Http\Request;
 use App\Billing\PaymentGateway;

@@ -33,12 +33,9 @@ class ConcertOrdersController extends Controller
             $tickets = $concert->findTickets($request['ticket_quantity']);
 
             $this->paymentGateway->charge($tickets->sum('price'), $request['payment_token']);
-            
+
             $order = Order::withTickets($request['email'], $tickets);
-            // $concert->createOrder($request['email'], $tickets);
-            // $concert->orderTickets($request['ticket_quantity'], $request['email']);
         } catch (PaymentFailedException $e) {
-            // $concert->cancelOrder($request['email']);
             return response()->json([], 422);
         } catch (NotEnoughTicketsException $e) {
             return response()->json([], 422);

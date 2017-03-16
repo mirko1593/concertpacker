@@ -17,8 +17,13 @@ class Order extends Model
     public function cancel()
     {
         $this->tickets->each(function ($ticket) {
-            $ticket->update(['order_id' => null]);
+            $ticket->release();
         });
         $this->delete();
+    }
+
+    public function ticketQuantity()
+    {
+        return $this->tickets()->count();
     }
 }

@@ -36,7 +36,7 @@ class ConcertOrdersController extends Controller
                 $request['payment_token']
             );
         } catch (PaymentFailedException $e) {
-            $concert->cancelTickets($request['email']);
+            $concert->cancelOrder($request['email']);
             return response()->json([], 422);
         } catch (NotEnoughTicketsException $e) {
             return response()->json([], 422);

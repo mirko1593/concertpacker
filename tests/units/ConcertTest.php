@@ -105,13 +105,13 @@ class ConcertTest extends TestCase
     }
 
     /** @test */
-    public function can_canel_concert_tickets()
+    public function can_canel_concert_order()
     {
         $concert = factory(Concert::class)->states('published')->create();
         $concert->addTickets(5);    
         $concert->orderTickets(3, 'john@example.com');
 
-        $concert->cancelTickets('john@example.com');
+        $concert->cancelOrder('john@example.com');
 
         $this->assertCount(5, $concert->remainingTickets());
     }

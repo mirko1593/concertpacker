@@ -60,7 +60,7 @@ class Concert extends Model
         $this->orders()->save($order);
     }
 
-    public function cancelTickets($email)
+    public function cancelOrder($email)
     {
         $order = $this->orders()->where('email', $email)->first();
         $order->cancel();
@@ -71,10 +71,22 @@ class Concert extends Model
         collect(range(1, $quantity))->each(function () {
             $this->tickets()->save(new Ticket);
         });
+
+        return $this;
     }
 
     public function remainingTickets()
     {
         return $this->tickets()->available()->get();
+    }
+
+    public function hasOrderFor($email)
+    {
+        return $this->orderFor($email) != null;
+    }
+
+    public function orderFor($email)
+    {
+        return $this->orders()->where('email', 'john@example.com')->first();
     }
 }

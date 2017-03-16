@@ -44,9 +44,16 @@ class Concert extends Model
 
     public function orderTickets($quantity, $email)
     {
+        $reservation = $this->reserveTickets($quantity);
+
+        return Order::withReservation($email, $reservation);
+    }
+
+    public function reserveTickets($quantity)
+    {
         $tickets = $this->findTickets($quantity);
 
-        $this->createOrder($email, $tickets);
+        return Reservation::reserve($tickets);
     }
 
     public function findTickets($quantity)
@@ -57,11 +64,6 @@ class Concert extends Model
         }
 
         return $remainingTickets->take($quantity);        
-    }
-
-    public function createOrder($email, $tickets)
-    {
-        Order::withTickets($email, $tickets);              
     }
 
     public function cancelOrder($email)

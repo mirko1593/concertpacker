@@ -52,4 +52,24 @@ $factory->state(App\Concert::class, 'unpublished', function (Faker\Generator $fa
     ];
 });
 
+$factory->define(App\Ticket::class, function (Faker\Generator $faker) {
+    return [
+        'concert_id' => function () {
+            return factory(App\Concert::class)->create()->id;
+        }
+    ];
+});
+
+$factory->state(App\Ticket::class, 'unreserved', function (Faker\Generator $faker) {
+    return [
+        'reserved_at' => null
+    ];
+});
+
+$factory->state(App\Ticket::class, 'reserved', function (Faker\Generator $faker) {
+    return [
+        'reserved_at' => Carbon::parse('-1 week')
+    ];
+});
+
 

@@ -15,19 +15,6 @@ class Order extends Model
         return $this->hasMany(Ticket::class);
     }
 
-    // public function concert()
-    // {
-    //     return $this->belongsTo(Concert::class);
-    // }
-
-    public function cancel()
-    {
-        $this->tickets->each(function ($ticket) {
-            $ticket->release();
-        });
-        $this->delete();
-    }
-
     public function ticketQuantity()
     {
         return $this->tickets()->count();
@@ -42,14 +29,14 @@ class Order extends Model
         ];
     }
 
-    public static function withTickets($email, $tickets)
+    public static function withReservation($email, $reservation)
     {
         $order = Order::create([
             'email' => $email, 
-            'amount' => $tickets->sum('price')
+            'amount' => $reservation->totalCost()
         ]);
 
-        $tickets->each(function ($ticket) use ($order) {
+        $reservation->getTickets()->each(function ($ticket) use ($order) {
             $order->tickets()->save($ticket);
         });
 

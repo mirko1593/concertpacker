@@ -15,10 +15,10 @@ class Order extends Model
         return $this->hasMany(Ticket::class);
     }
 
-    public function concert()
-    {
-        return $this->belongsTo(Concert::class);
-    }
+    // public function concert()
+    // {
+    //     return $this->belongsTo(Concert::class);
+    // }
 
     public function cancel()
     {
@@ -40,5 +40,19 @@ class Order extends Model
             'ticket_quantity' => $this->ticketQuantity(), 
             'amount' => $this->amount
         ];
+    }
+
+    public static function withTickets($email, $tickets)
+    {
+        $order = Order::create([
+            'email' => $email, 
+            'amount' => $tickets->sum('price')
+        ]);
+
+        $tickets->each(function ($ticket) use ($order) {
+            $order->tickets()->save($ticket);
+        });
+
+        return $order;
     }
 }

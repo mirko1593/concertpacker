@@ -34,7 +34,7 @@ class Concert extends Model
 
     public function orders()
     {
-        return $this->hasMany(Order::class);
+        return $this->belongsToMany(Order::class, 'tickets');
     }
 
     public function tickets()
@@ -61,14 +61,7 @@ class Concert extends Model
 
     public function createOrder($email, $tickets)
     {
-        $order = $this->orders()->save(new Order([
-            'email' => $email,
-            'amount' => $this->ticket_price * $tickets->count()
-        ]));
-
-        $tickets->each(function ($ticket) use ($order) {
-            $order->tickets()->save($ticket);
-        });                
+        Order::withTickets($email, $tickets);              
     }
 
     public function cancelOrder($email)

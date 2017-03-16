@@ -31,11 +31,11 @@ class ConcertOrdersController extends Controller
 
         try {
             $tickets = $concert->findTickets($request['ticket_quantity']);
-            $this->paymentGateway->charge(
-                $concert->ticket_price * $request['ticket_quantity'], 
-                $request['payment_token']
-            );
-            $concert->createOrder($request['email'], $tickets);
+
+            $this->paymentGateway->charge($tickets->sum('price'), $request['payment_token']);
+            
+            $order = Order::withTickets($request['email'], $tickets);
+            // $concert->createOrder($request['email'], $tickets);
             // $concert->orderTickets($request['ticket_quantity'], $request['email']);
         } catch (PaymentFailedException $e) {
             // $concert->cancelOrder($request['email']);
@@ -44,6 +44,6 @@ class ConcertOrdersController extends Controller
             return response()->json([], 422);
         }
 
-        return response()->json($concert->orderFor($request['email']), 201);
+        return response()->json($order, 201);
     }
 }

@@ -11,6 +11,20 @@ class OrderTest extends TestCase
     use DatabaseMigrations;
 
     /** @test */
+    public function create_an_order_for_email_and_tickets()
+    {
+        $concert = factory(Concert::class)->states('published')->create()->addTickets(10);
+        $tickets = $concert->findTickets(10);        
+        
+        $order = Order::withTickets('john@example.com', $tickets);
+
+        $this->assertTrue($concert->hasOrderFor('john@example.com'));
+        $this->assertEquals(10, $order->ticketQuantity());
+        $this->assertEquals(32500, $order->amount);
+        $this->assertCount(0, $concert->remainingTickets());
+    }
+
+    /** @test */
     public function order_can_be_canceled()
     {
         $concert = factory(Concert::class)->states('published')->create()->addTickets(10);

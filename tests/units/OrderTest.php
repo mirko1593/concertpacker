@@ -28,7 +28,8 @@ class OrderTest extends TestCase
     public function order_can_be_converted_to_array()
     {
         $concert = factory(Concert::class)->states('published')->create()->addTickets(10);
-        $order = $concert->orderTickets(5, 'john@example.com');
+        $reservation = $concert->reserveTickets(5, 'john@example.com');
+        $order = Order::withReservation('john@example.com', $reservation);
 
         $result = $order->toArray();
 

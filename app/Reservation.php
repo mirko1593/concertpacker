@@ -36,4 +36,11 @@ class Reservation
     {
         return $this->tickets;
     }
+
+    public function cancel()
+    {
+        $this->tickets->each(function ($ticket) {
+            $ticket->release();
+        });
+    }
 }

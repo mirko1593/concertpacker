@@ -14,10 +14,20 @@ class ReservationTest extends TestCase
     public function calculate_the_total_cost_of_an_reservation()
     {
         $concert = factory(Concert::class)->states('published')->create()->addTickets(10);
-        $tickets = $concert->findTickets(10);
-
-        $reservation = new Reservation($tickets);
+        
+        $reservation = $concert->reserveTickets(10);
 
         $this->assertEquals(32500, $reservation->totalCost());
+    }
+
+    /** @test */
+    public function reservation_can_be_canceled()
+    {
+        $concert = factory(Concert::class)->states('published')->create()->addTickets(10);  
+        $reservation = $concert->reserveTickets(5);
+
+        $reservation->cancel();
+
+        $this->assertCount(10, $concert->remainingTickets());
     }
 }

@@ -58,6 +58,7 @@ class PurchaseTicketsTest extends TestCase
 
         $this->assertResponseStatus(422);
         $this->assertFalse($concert->hasOrderFor('john@example.com'));
+        $this->assertCount(3, $concert->remainingTickets());
     }
 
     /** @test */

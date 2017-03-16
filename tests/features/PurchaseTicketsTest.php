@@ -92,4 +92,35 @@ class PurchaseTicketsTest extends TestCase
         $this->assertEquals(0, $this->paymentGateway->totalCharges());
         $this->assertCount(10, $concert->remainingTickets());
     }
+
+    /** @test */
+    public function cannot_purchase_tickets_already_been_reserved()
+    {
+        $this->disableExceptionHandling();
+
+        $concert = factory(Concert::class)->states('published')->create()->addTickets(10);
+        $this->paymentGateway->beforeFirstCharge(function ($paymentGateway) use ($concert) {
+            $this->json('POST', "/concerts/{$concert->id}/orders", [
+                'email' => 'jane@example.com',
+                'ticket_quantity' => 1,
+                'payment_token' => $this->paymentGateway->getValidToken()
+            ]);
+
+            $this->assertResponseStatus(422);
+            $this->assertFalse($concert->hasOrderFor('jane@example.com'));
+            $this->assertEquals(0, $this->paymentGateway->totalCharges());            
+        });
+
+        $this->json('POST', "/concerts/{$concert->id}/orders", [
+            'email' => 'john@example.com',
+            'ticket_quantity' => 10,
+            'payment_token' => $this->paymentGateway->getValidToken()
+        ]);
+
+        $this->assertResponseStatus(201);
+        $order = $concert->orderFor('john@example.com');
+        $this->assertNotNull($order);
+        $this->assertEquals(10, $order->ticketQuantity());
+        $this->assertEquals(32500, $this->paymentGateway->totalCharges());
+    }
 }

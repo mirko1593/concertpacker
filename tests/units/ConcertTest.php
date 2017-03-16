@@ -56,16 +56,14 @@ class ConcertTest extends TestCase
     }
 
     /** @test */
-    public function can_order_concert_tickets()
+    public function can_reserve_concert_tickets()
     {
-        $concert = factory(Concert::class)->states('published')->create();
-        $concert->addTickets(10);
+        $concert = factory(Concert::class)->states('published')->create()->addTickets(10);
 
-        $concert->orderTickets(5, 'john@example.com');
+        $reservation = $concert->reserveTickets(10, 'john@example.com');
 
-        $order = $concert->orders()->where('email', 'john@example.com')->first();
-        $this->assertNotNull($order);
-        $this->assertEquals(5, $order->tickets()->count());
+        $this->assertEquals(32500, $reservation->totalCost());
+        $this->assertCount(0, $concert->remainingTickets());        
     }
 
     /** @test */
@@ -81,10 +79,9 @@ class ConcertTest extends TestCase
     /** @test */
     public function remaining_tickets_does_not_include_ordered_tickets()
     {
-        $concert = factory(Concert::class)->states('published')->create();
-        $concert->addTickets(50);
+        $concert = factory(Concert::class)->states('published')->create()->addTickets(50);
 
-        $concert->orderTickets(25, 'john@example.com');
+        $concert->reserveTickets(25, 'john@example.com');
 
         $this->assertCount(25, $concert->remainingTickets());
     }
@@ -92,11 +89,10 @@ class ConcertTest extends TestCase
     /** @test */
     public function purchase_more_tickets_than_remaining_will_throw_exception()
     {
-        $concert = factory(Concert::class)->states('published')->create();
-        $concert->addTickets(50);    
+        $concert = factory(Concert::class)->states('published')->create()->addTickets(50);
 
         try {
-            $concert->orderTickets(51, 'john@example.com');    
+            $concert->reserveTickets(51, 'john@example.com');    
         } catch (NotEnoughTicketsException $e) {
             return;
         }

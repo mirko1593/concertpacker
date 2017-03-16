@@ -66,12 +66,6 @@ class Concert extends Model
         return $remainingTickets->take($quantity);        
     }
 
-    public function cancelOrder($email)
-    {
-        $order = $this->orders()->where('email', $email)->first();
-        $order->cancel();
-    }
-
     public function addTickets($quantity)
     {
         collect(range(1, $quantity))->each(function () {

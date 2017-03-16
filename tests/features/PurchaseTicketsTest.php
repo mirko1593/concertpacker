@@ -33,6 +33,11 @@ class PurchaseTicketsTest extends TestCase
         ]);
 
         $this->assertResponseStatus(201);
+        $this->seeJsonSubset([
+            'email' => 'john@example.com',
+            'ticket_quantity' => 3,
+            'amount' => 3250 * 3
+        ]);
         $order = $concert->orderFor('john@example.com');
         $this->assertNotNull($order);
         $this->assertEquals(3, $order->ticketQuantity());
@@ -42,9 +47,7 @@ class PurchaseTicketsTest extends TestCase
     /** @test */
     public function an_order_is_not_created_if_payment_fails()
     {
-        $concert = factory(Concert::class)->states('published')->create([
-            'ticket_price' => 3250
-        ])->addTickets(3);
+        $concert = factory(Concert::class)->states('published')->create()->addTickets(3);
 
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email' => 'john@example.com',
@@ -59,9 +62,7 @@ class PurchaseTicketsTest extends TestCase
     /** @test */
     public function cannot_purchase_tickets_to_an_unpublished_concert()
     {
-        $concert = factory(Concert::class)->states('unpublished')->create([
-            'ticket_price' => 3250
-        ])->addTickets(3);
+        $concert = factory(Concert::class)->states('unpublished')->create()->addTickets(3);
 
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email' => 'john@example.com',

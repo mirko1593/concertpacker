@@ -42,6 +42,6 @@ class ConcertOrdersController extends Controller
             return response()->json([], 422);
         }
 
-        return response()->json([], 201);
+        return response()->json($concert->orderFor($request['email']), 201);
     }
 }

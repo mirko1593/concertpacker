@@ -105,7 +105,7 @@ class ConcertTest extends TestCase
     {
         $concert = factory(Concert::class)->states('published')->create()->addTickets(10);
         
-        $reservation = $concert->reserveTickets(10);
+        $reservation = $concert->reserveTickets(10, 'john@example.com');
 
         $this->assertCount(0, $concert->remainingTickets());
         $this->assertEquals(32500, $reservation->totalCost());

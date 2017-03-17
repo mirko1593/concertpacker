@@ -11,12 +11,12 @@ class OrderTest extends TestCase
     use DatabaseMigrations;
 
     /** @test */
-    public function create_an_order_for_email_and_reservation()
+    public function create_an_order_with_reservation()
     {
         $concert = factory(Concert::class)->states('published')->create()->addTickets(10);
-        $reservation = $concert->reserveTickets(10);    
+        $reservation = $concert->reserveTickets(10, 'john@example.com');    
         
-        $order = Order::withReservation('john@example.com', $reservation);
+        $order = Order::withReservation($reservation);
 
         $this->assertTrue($concert->hasOrderFor('john@example.com'));
         $this->assertEquals(10, $order->ticketQuantity());
@@ -29,7 +29,7 @@ class OrderTest extends TestCase
     {
         $concert = factory(Concert::class)->states('published')->create()->addTickets(10);
         $reservation = $concert->reserveTickets(5, 'john@example.com');
-        $order = Order::withReservation('john@example.com', $reservation);
+        $order = Order::withReservation($reservation);
 
         $result = $order->toArray();
 

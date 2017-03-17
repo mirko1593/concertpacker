@@ -42,11 +42,11 @@ class Concert extends Model
         return $this->hasMany(Ticket::class);
     }
     
-    public function reserveTickets($quantity)
+    public function reserveTickets($quantity, $email)
     {
         $tickets = $this->findTickets($quantity);
 
-        return Reservation::reserve($tickets);
+        return Reservation::reserve($tickets, $email);
     }
 
     public function findTickets($quantity)

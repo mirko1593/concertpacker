@@ -29,12 +29,9 @@ class Order extends Model
         ];
     }
 
-    public static function withReservation($email, $reservation)
+    public static function withReservation($reservation)
     {
-        $order = Order::create([
-            'email' => $email, 
-            'amount' => $reservation->totalCost()
-        ]);
+        $order = Order::create($reservation->toArray());
 
         $reservation->getTickets()->each(function ($ticket) use ($order) {
             $order->tickets()->save($ticket);

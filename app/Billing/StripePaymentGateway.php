@@ -49,13 +49,22 @@ class StripePaymentGateway implements PaymentGateway
         return $token->id;
     }
 
-    public function lastCharge($ending_before = null)
+    public function chargesDuring($callback)
     {
-        $lastCharges = $ending_before === null 
-            ? $this->allCharges(1)
-            : $this->allCharges(1, ['ending_before' => $ending_before->id]);
+        $currentLastCharge = $this->lastCharge();
+        $callback($this);
 
-        return $lastCharges[0];
+        return collect($this->chargesSince($currentLastCharge))->pluck('amount')->values();
+    }
+
+    public function lastCharge()
+    {
+        return $this->allCharges()[0];
+    }
+
+    public function chargesSince($ending_before, $limit = 10)
+    {
+        return $this->allCharges($limit, ['ending_before' => $ending_before->id]);
     }
 
     protected function allCharges($limit = 10, $params = [])

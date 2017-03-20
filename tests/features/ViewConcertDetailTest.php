@@ -15,19 +15,18 @@ class ViewConcertDetailTest extends TestCase
     {
         $concert = factory(Concert::class)->states('published')->create();
 
-        $this->visit('concerts/' . $concert->id);
+        $response = $this->get('concerts/' . $concert->id);
 
-        $this->see('Title');
-        $this->see('SubTitle');
-        $this->see('$32.50');
-        $this->see('Venue');
-        $this->see('Venue Address');
-        $this->see('City');
-        $this->see('State');
-        $this->see('100000');
-        $this->see('May 1, 2017');
-        $this->see('8:00pm');
-        $this->see('Additional Information');
+        $response->assertStatus(200);
+        $response->assertSee('Title');
+        $response->assertSee('SubTitle');
+        $response->assertSee('$32.50');
+        $response->assertSee('Venue');
+        $response->assertSee('Venue Address');
+        $response->assertSee('City, State 100000');
+        $response->assertSee('May 1, 2017');
+        $response->assertSee('8:00pm');
+        $response->assertSee('Additional Information');
     }
 
     /** @test */
@@ -35,8 +34,8 @@ class ViewConcertDetailTest extends TestCase
     {
         $concert = factory(Concert::class)->states('unpublished')->create();
 
-        $this->get('concerts/' . $concert->id);
+        $response = $this->get('concerts/' . $concert->id);
 
-        $this->assertResponseStatus(404);
+        $response->assertStatus(404);
     }
 }

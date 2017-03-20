@@ -51,13 +51,13 @@ class ConcertOrdersControllerTest extends TestCase
 
     protected function validateField($field, $data)
     {
-        $this->json('POST', "/concerts/{$this->concert->id}/orders", array_merge([
+        $response = $this->json('POST', "/concerts/{$this->concert->id}/orders", array_merge([
             'email' => 'john@example.com',
             'ticket_quantity' => 3,
             'payment_token' => $this->paymentGateway->getValidTestToken()
         ], $data));
 
-        $this->assertResponseStatus(422);
-        $this->assertArrayHasKey($field, $this->decodeResponseJson());
+        $response->assertStatus(422);
+        $this->assertArrayHasKey($field, $response->decodeResponseJson());
     }    
 }

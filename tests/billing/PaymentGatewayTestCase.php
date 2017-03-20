@@ -20,18 +20,22 @@ trait PaymentGatewayTestCase
     }
 
     /** @test */
-    public function charge_with_an_invalid_token_failed()
+    public function can_check_failed_charges_with_callback()
     {
         $paymentGateway = $this->getPaymentGateway();
-        
-        try {
-            $paymentGateway->charge(2500, 'invalid-token');
-        } catch (PaymentFailedException $e) {
-            $this->assertEquals(0, $paymentGateway->totalCharges());
-            return;
-        }
+        $lastCharges = $paymentGateway->chargesDuring(function ($paymentGateway) {
+            try {
+                $paymentGateway->charge(2500, 'invalid-token');
+            } catch (PaymentFailedException $e) {
+                return;
+            }
 
-        $this->fail();
+            $this->fail();
+        });
+
+        $this->assertEquals(0, $lastCharges->sum());
+        $this->assertEquals([], $lastCharges->toArray());
+        $this->assertEquals(0, $paymentGateway->totalCharges());
     }    
 
    /** @test */
@@ -47,5 +51,5 @@ trait PaymentGatewayTestCase
 
         $this->assertEquals(10000, $paymentGateway->totalCharges());
         $this->assertEquals([4000, 3000], $lastCharges->toArray());
-    }     
+    }  
 }

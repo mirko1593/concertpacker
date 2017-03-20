@@ -16,7 +16,7 @@ class FakePaymentGatewayTest extends TestCase
     /** @test */
     public function charge_with_a_valid_token_succeed()
     {
-        $this->paymentGateway->charge(9750, $this->paymentGateway->getValidToken());
+        $this->paymentGateway->charge(9750, $this->paymentGateway->getValidToken(null, null));
 
         $this->assertEquals(9750, $this->paymentGateway->totalCharges());
     }

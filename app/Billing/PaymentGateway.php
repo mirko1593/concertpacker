@@ -4,7 +4,7 @@ namespace App\Billing;
 
 interface PaymentGateway
 {
-    public function getValidToken();
+    public function getValidToken($card, $cvc);
 
     public function charge($amount, $token);
 

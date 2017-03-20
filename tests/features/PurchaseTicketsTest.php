@@ -30,7 +30,7 @@ class PurchaseTicketsTest extends TestCase
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email' => 'john@example.com',
             'ticket_quantity' => 3,
-            'payment_token' => $this->paymentGateway->getValidToken()
+            'payment_token' => $this->paymentGateway->getValidToken(null, null)
         ]);
 
         $this->assertResponseStatus(201);
@@ -69,7 +69,7 @@ class PurchaseTicketsTest extends TestCase
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email' => 'john@example.com',
             'ticket_quantity' => 3,
-            'payment_token' => $this->paymentGateway->getValidToken()
+            'payment_token' => $this->paymentGateway->getValidToken(null, null)
         ]);
 
         $this->assertResponseStatus(404);
@@ -85,7 +85,7 @@ class PurchaseTicketsTest extends TestCase
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email' => 'john@example.com',
             'ticket_quantity' => 11,
-            'payment_token' => $this->paymentGateway->getValidToken()
+            'payment_token' => $this->paymentGateway->getValidToken(null, null)
         ]);
 
         $this->assertResponseStatus(422);
@@ -104,7 +104,7 @@ class PurchaseTicketsTest extends TestCase
             $this->json('POST', "/concerts/{$concert->id}/orders", [
                 'email' => 'jane@example.com',
                 'ticket_quantity' => 1,
-                'payment_token' => $this->paymentGateway->getValidToken()
+                'payment_token' => $this->paymentGateway->getValidToken(null, null)
             ]);
 
             $this->assertResponseStatus(422);
@@ -115,7 +115,7 @@ class PurchaseTicketsTest extends TestCase
         $this->json('POST', "/concerts/{$concert->id}/orders", [
             'email' => 'john@example.com',
             'ticket_quantity' => 10,
-            'payment_token' => $this->paymentGateway->getValidToken()
+            'payment_token' => $this->paymentGateway->getValidToken(null, null)
         ]);
 
         $this->assertResponseStatus(201);

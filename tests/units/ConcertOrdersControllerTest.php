@@ -54,7 +54,7 @@ class ConcertOrdersControllerTest extends TestCase
         $this->json('POST', "/concerts/{$this->concert->id}/orders", array_merge([
             'email' => 'john@example.com',
             'ticket_quantity' => 3,
-            'payment_token' => $this->paymentGateway->getValidToken()
+            'payment_token' => $this->paymentGateway->getValidToken(null, null)
         ], $data));
 
         $this->assertResponseStatus(422);

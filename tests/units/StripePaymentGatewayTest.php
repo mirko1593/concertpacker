@@ -12,7 +12,7 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 /**
  * @group internet
  */
-class StripePaymentTest extends TestCase
+class StripePaymentGatewayTest extends TestCase
 {
     /** @test */
     public function can_charges_with_a_valid_token()
@@ -20,7 +20,7 @@ class StripePaymentTest extends TestCase
         $paymentGateway = new StripePaymentGateway();
         $currentLastCharge = $paymentGateway->lastCharge();
 
-        $paymentGateway->charge(3500, $paymentGateway->getValidToken('4242424242424242', '314'));
+        $paymentGateway->charge(3500, $paymentGateway->getValidTestToken());
 
         $lastCharge = $paymentGateway->lastCharge($currentLastCharge);
         

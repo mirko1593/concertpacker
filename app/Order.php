@@ -15,6 +15,11 @@ class Order extends Model
         return $this->hasMany(Ticket::class);
     }
 
+    public function getFormattedAmountAttribute()
+    {
+        return '$' . number_format($this->amount / 100, 2);
+    }
+
     public function ticketQuantity()
     {
         return $this->tickets()->count();
@@ -38,5 +43,10 @@ class Order extends Model
         });
 
         return $order;
+    }
+
+    public static function findByConfirmationNumber($confirmation_number)
+    {
+        return self::where('confirmation_number', $confirmation_number)->firstOrFail();
     }
 }

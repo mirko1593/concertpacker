@@ -1,7 +1,9 @@
 <?php 
 
 use App\Order;
+use App\Ticket;
 use App\Concert;
+use App\OrderConfirmationNumberGenerator;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -10,6 +12,13 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 class OrderTest extends TestCase
 {
     use DatabaseMigrations;
+
+    /** @setUp */
+    public function setUp()
+    {
+        parent::setUp();
+      
+    }
 
     /** @test */
     public function create_an_order_with_reservation()
@@ -28,16 +37,25 @@ class OrderTest extends TestCase
     /** @test */
     public function order_can_be_converted_to_array()
     {
-        $concert = factory(Concert::class)->states('published')->create()->addTickets(10);
-        $reservation = $concert->reserveTickets(5, 'john@example.com');
-        $order = Order::withReservation($reservation);
+        $orderConfirmationNumberGenerator = Mockery::mock(OrderConfirmationNumberGenerator::class, [
+            'generate' => 'ORDERCONFIRMATION1234'
+        ]);
+
+        $this->app->instance(OrderConfirmationNumberGenerator::class, $orderConfirmationNumberGenerator);          
+        $order = factory(Order::class)->create([
+            'email' => 'john@example.com', 
+            'amount' => 6000,
+            'confirmation_number' => Order::generateNumber()
+        ]);
+        $order->tickets()->saveMany(factory(Ticket::class)->times(5)->create());
 
         $result = $order->toArray();
 
         $this->assertEquals($result, [
             'email' => 'john@example.com', 
             'ticket_quantity' => 5,
-            'amount' => 5 * 3250
+            'amount' => 6000, 
+            'confirmation_number' => 'ORDERCONFIRMATION1234'
         ]);        
     }
 

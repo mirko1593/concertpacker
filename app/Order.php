@@ -5,6 +5,7 @@ namespace App;
 use App\Ticket;
 use App\Concert;
 use Illuminate\Database\Eloquent\Model;
+use App\OrderConfirmationNumberGenerator;
 
 class Order extends Model
 {
@@ -30,13 +31,16 @@ class Order extends Model
         return [
             'email' => $this->email,
             'ticket_quantity' => $this->ticketQuantity(), 
-            'amount' => $this->amount
+            'amount' => $this->amount, 
+            'confirmation_number' => $this->confirmation_number
         ];
     }
 
     public static function withReservation($reservation)
     {
-        $order = Order::create($reservation->toArray());
+        $order = Order::create(array_merge($reservation->toArray(), [
+            'confirmation_number' => self::generateNumber()
+        ]));
 
         $reservation->getTickets()->each(function ($ticket) use ($order) {
             $order->tickets()->save($ticket);
@@ -48,5 +52,10 @@ class Order extends Model
     public static function findByConfirmationNumber($confirmation_number)
     {
         return self::where('confirmation_number', $confirmation_number)->firstOrFail();
+    }
+
+    public static function generateNumber()
+    {
+        return app(OrderConfirmationNumberGenerator::class)->generate();
     }
 }

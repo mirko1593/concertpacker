@@ -5,6 +5,7 @@ namespace App;
 use App\Ticket;
 use App\Concert;
 use Illuminate\Database\Eloquent\Model;
+use App\Facades\OrderConfirmationNumber;
 use App\OrderConfirmationNumberGenerator;
 
 class Order extends Model

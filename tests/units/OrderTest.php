@@ -45,7 +45,7 @@ class OrderTest extends TestCase
         $order = factory(Order::class)->create([
             'email' => 'john@example.com', 
             'amount' => 6000,
-            'confirmation_number' => Order::generateNumber()
+            'confirmation_number' => app(OrderConfirmationNumberGenerator::class)->generate()
         ]);
         $order->tickets()->saveMany(factory(Ticket::class)->times(5)->create());
 

@@ -1,7 +1,9 @@
 <?php 
 
+use App\Ticket;
 use App\Concert;
 use App\Reservation;
+use App\Billing\Charge;
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -44,5 +46,21 @@ class ReservationTest extends TestCase
             'email' => 'john@example.com', 
             'amount' => 32500
         ]);        
+    }
+
+    /** @test */
+    public function reservation_can_be_completed()
+    {
+        $tickets = factory(Ticket::class, 10)->states('unreserved')->create();
+        $reservation = new Reservation($tickets, 'john@example.com');
+        $charge = new Charge([
+            'card_last_four' => '4242'
+        ]);
+
+        $order = $reservation->complete($charge);
+
+        $this->assertEquals('john@example.com', $order->email);
+        $this->assertEquals(32500, $order->amount);
+        $this->assertEquals('4242', $order->card_last_four);
     }
 }

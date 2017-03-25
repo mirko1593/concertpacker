@@ -60,8 +60,8 @@ class Reservation
         ];
     }
 
-    public function complete()
+    public function complete($charge)
     {
-        return Order::withReservation($this);
+        return Order::withReservationAndCharge($this, $charge);
     }
 }

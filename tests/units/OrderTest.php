@@ -1,9 +1,8 @@
 <?php 
 
-use App\Order;
-use App\Ticket;
-use App\Concert;
+use App\Billing\Charge;
 use App\OrderConfirmationNumberGenerator;
+use App\{Order, Ticket, Concert, Reservation};
 use Illuminate\Foundation\Testing\WithoutMiddleware;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
@@ -13,25 +12,22 @@ class OrderTest extends TestCase
 {
     use DatabaseMigrations;
 
-    /** @setUp */
-    public function setUp()
-    {
-        parent::setUp();
-      
-    }
-
     /** @test */
-    public function create_an_order_with_reservation()
+    public function create_an_order_with_reservation_and_charge()
     {
-        $concert = factory(Concert::class)->states('published')->create()->addTickets(10);
-        $reservation = $concert->reserveTickets(10, 'john@example.com');    
+        $tickets = factory(Ticket::class, 10)->states('unreserved')->create();
+        $reservation = Reservation::reserve($tickets, 'john@example.com');
+        $charge = new Charge([
+            'amount' => '32500', 
+            'card_last_four' => '4242'
+        ]);
         
-        $order = Order::withReservation($reservation);
+        $order = Order::withReservationAndCharge($reservation, $charge);
 
-        $this->assertTrue($concert->hasOrderFor('john@example.com'));
+        $this->assertEquals('john@example.com', $order->email);
         $this->assertEquals(10, $order->ticketQuantity());
         $this->assertEquals(32500, $order->amount);
-        $this->assertCount(0, $concert->remainingTickets());
+        $this->assertEquals('4242', $order->card_last_four);
     }
 
     /** @test */

@@ -37,10 +37,11 @@ class Order extends Model
         ];
     }
 
-    public static function withReservation($reservation)
+    public static function withReservationAndCharge($reservation, $charge)
     {
         $order = Order::create(array_merge($reservation->toArray(), [
-            'confirmation_number' => self::generateNumber()
+            'confirmation_number' => self::generateNumber(), 
+            'card_last_four' => $charge->cardLastFour()
         ]));
 
         $reservation->getTickets()->each(function ($ticket) use ($order) {

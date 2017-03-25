@@ -2,8 +2,10 @@
 
 namespace App\Billing;
 
+use App\Billing\Charge;
+use Stripe\{Token, Stripe};
 use Stripe\Error\InvalidRequest;
-use Stripe\{Token, Charge, Stripe};
+use Stripe\Charge as StripeCharge;
 
 class StripePaymentGateway implements PaymentGateway
 {
@@ -18,7 +20,7 @@ class StripePaymentGateway implements PaymentGateway
     public function charge($amount, $token)
     {
         try {
-            $charge = Charge::create([
+            $stripeCharge = StripeCharge::create([
                 'amount' => $amount, 
                 'source' => $token, 
                 'currency' => 'usd'
@@ -27,19 +29,23 @@ class StripePaymentGateway implements PaymentGateway
             throw new PaymentFailedException($e->getMessage());
         }
 
-        $this->charges[] = $charge;
+        return $this->charges[] = new Charge([
+            'id' => $stripeCharge['id'],
+            'amount' => $stripeCharge['amount'], 
+            'card_last_four' => $stripeCharge['source']['last4']
+        ]);
     }
 
     public function totalCharges()
     {
-        return $this->charges->sum('amount');   
+        return $this->charges->map->amount()->sum();   
     }
 
-    public function getValidTestToken()
+    public function getValidTestToken($card = '4242424242424242')
     {
         $token = Token::create([
             "card" => [
-                "number" => '4242424242424242',
+                "number" => $card,
                 "exp_month" => 1,
                 "exp_year" => date('Y') + 1,
                 "cvc" => '314'
@@ -54,23 +60,45 @@ class StripePaymentGateway implements PaymentGateway
         $currentLastCharge = $this->lastCharge();
         $callback($this);
 
-        return collect($this->chargesSince($currentLastCharge))->pluck('amount')->values();
+        return $this->chargesSince($currentLastCharge);
     }
 
-    public function lastCharge()
+    protected function lastCharge()
     {
         return $this->allCharges()[0];
     }
 
-    public function chargesSince($ending_before, $limit = 10)
+    protected function chargesSince($ending_before, $limit = 10)
     {
-        return $this->allCharges($limit, ['ending_before' => $ending_before->id]);
+        return $this->stripeChargesSince($ending_before, $limit)->map(function ($stripeCharge) {
+            return new Charge([
+                'id' => $stripeCharge['id'],
+                'amount' => $stripeCharge['amount'], 
+                'card_last_four' => $stripeCharge['source']['last4']
+            ]);
+        });
+    }
+
+    protected function stripeChargesSince($ending_before, $limit)
+    {
+        return $this->allStripeCharges($limit, ['ending_before' => $ending_before->stripeChargeId()]);
     }
 
     protected function allCharges($limit = 10, $params = [])
     {
-        return Charge::all(array_merge([
+        return $this->allStripeCharges($limit, $params)->map(function ($stripeCharge) {
+            return new Charge([
+                'id' => $stripeCharge['id'],
+                'amount' => $stripeCharge['amount'], 
+                'card_last_four' => $stripeCharge['source']['last4']
+            ]);
+        });
+    }
+
+    protected function allStripeCharges($limit, $params = [])
+    {
+        return collect(StripeCharge::all(array_merge([
             'limit' => $limit
-        ], $params))['data'];
+        ], $params))['data']);
     }
 }

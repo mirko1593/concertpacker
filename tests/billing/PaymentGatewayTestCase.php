@@ -58,8 +58,8 @@ trait PaymentGatewayTestCase
     {
         $paymentGateway = $this->getPaymentGateway();
 
-        $charge = $paymentGateway->charge(2500, $paymentGateway->getValidTestToken('4242424242424242'));
+        $charge = $paymentGateway->charge(2500, $paymentGateway->getValidTestToken($paymentGateway::TEST_CARD_NUMBER));
 
-        $this->assertEquals('4242', $charge->cardLastFour());
+        $this->assertEquals(substr($paymentGateway::TEST_CARD_NUMBER, -4), $charge->cardLastFour());
     }    
 }

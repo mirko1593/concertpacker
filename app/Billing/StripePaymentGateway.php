@@ -9,6 +9,8 @@ use Stripe\Charge as StripeCharge;
 
 class StripePaymentGateway implements PaymentGateway
 {
+    const TEST_CARD_NUMBER = '4242424242424242';
+
     protected $charges;
 
     public function __construct()
@@ -41,7 +43,7 @@ class StripePaymentGateway implements PaymentGateway
         return $this->charges->map->amount()->sum();   
     }
 
-    public function getValidTestToken($card = '4242424242424242')
+    public function getValidTestToken($card = self::TEST_CARD_NUMBER)
     {
         $token = Token::create([
             "card" => [
